@@ -121,6 +121,10 @@
 </head>
 <body>
     <a-scene physics="debug: false">
+
+        <a-assets>
+            <a-asset-item id="roof-obj" src="models/polygonalRoof.obj"></a-asset-item>
+        </a-assets>
 <!--        position="0 0 -15"-->
         <a-entity id="rig" movement-controls="constrainToNavMesh: true"
                   keyboard-controls
@@ -363,6 +367,10 @@
 
             <a-box class="interupter inside" width="2" height="0.1" depth="2" position="0 0 -8" opacity="0" static-body
                    detect-collisions="linkElems: .balcony-door"></a-box>
+        </a-entity>
+        <a-entity position="0 4.4 0">
+            <a-obj-model src="#roof-obj" scale="0.04 0.04 0.06" rotation="0 90 0" position="6 0 -0.5"></a-obj-model>
+            <a-obj-model src="#roof-obj" scale="0.04 0.04 0.06" rotation="0 -90 0" position="-6 0 -0.5"></a-obj-model>
         </a-entity>
     </a-scene>
 </body>
