@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Joyeux Anniversaire Laurie</title>
+
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/super-hands@3.0.0/dist/super-hands.min.js"></script>
+    <!--    <script src="libs/js/aframe/teleport-controls/aframe-teleport-controls.js"></script>-->
+    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js"></script>
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-mirror-component/dist/aframe-mirror-component.min.js"></script>
+    <script>
+        AFRAME.registerComponent('detect-collisions', {
+        	schema: {
+        		linkElems: {
+        			type: 'selectorAll'
+                }
+            },
+        	init() {
+                this.el.addEventListener('collide', e => {
+        			// console.log(e);
+                    if (this.data.linkElems) {
+                    	for (const elem of this.data.linkElems) {
+                    		// console.log(elem);
+                            if (!elem.hasAttribute('open-door') && !elem.hasAttribute('close-door')) {
+	                            elem.setAttribute('open-door', '');
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        AFRAME.registerComponent('open-door', {
+        	init() {
+        		if (this.el.classList.contains('left')) {
+        			this.el.setAttribute('animation', `
+        			             property: rotation;
+                                 from: 0 180 0;
+                                 to: 0 90 0;
+                                 dur: 2000;
+                                 easing: linear;
+                                 loop: false`);
+                } else if (this.el.classList.contains('right')) {
+			        this.el.setAttribute('animation', `
+			                     property: rotation;
+                                 from: 0 -180 0;
+                                 to: 0 -90 0;
+                                 dur: 2000;
+                                 easing: linear;
+                                 loop: false`);
+                }
+
+        		const timeout = setTimeout(() => {
+			        console.log('open');
+			        const timeout2 = setTimeout(() => {
+				        console.log('open 1');
+				        this.el.removeAttribute('open-door');
+				        this.el.setAttribute('close-door', '');
+				        clearTimeout(timeout2);
+			        }, 3000);
+                    clearTimeout(timeout);
+                }, 2000);
+            }
+        });
+
+        AFRAME.registerComponent('close-door', {
+        	init() {
+        		if (this.el.classList.contains('left')) {
+        			this.el.setAttribute('animation', `
+        			             property: rotation;
+                                 from: 0 180 0;
+                                 to: 0 90 0;
+                                 dur: 2000;
+                                 dir: reverse;
+                                 easing: linear;
+                                 loop: false`);
+                } else if (this.el.classList.contains('right')) {
+			        this.el.setAttribute('animation', `
+			                     property: rotation;
+                                 from: 0 -180 0;
+                                 to: 0 -90 0;
+                                 dur: 2000;
+                                 dir: reverse;
+                                 easing: linear;
+                                 loop: false`);
+                }
+
+		        const timeout = setTimeout(() => {
+		        	console.log('close');
+			        this.el.removeAttribute('close-door');
+			        this.el.removeAttribute('animation');
+        			clearTimeout(timeout);
+                }, 2000);
+            }
+        });
+
+        AFRAME.registerComponent('window', {
+        	init() {
+        		this.el.innerHTML = `<a-box width="0.05" height="1.2" depth="0.05" position="-0.5 0 0"></a-box>
+                        <a-box width="0.05" height="1.2" depth="0.05" position="0.5 0 0"></a-box>
+                        <a-box width="0.05" height="1.2" depth="0.05"></a-box>
+
+                        <a-box width="0.05" height="1" depth="0.05" rotation="0 0 90"></a-box>
+                        <a-box width="0.05" height="1.05" depth="0.05" position="0 -0.6 0" rotation="0 0 90"></a-box>
+                        <a-box width="0.05" height="1.05" depth="0.05" position="0 0.575 0" rotation="0 0 90"></a-box>
+
+                        <a-box width="1" height="1.2" depth="0.025" opacity="0.5" color="gray" position="0 0 0"></a-box>`;
+            }
+        });
+
+        AFRAME.registerPrimitive('a-window', {
+        	defaultComponents: {
+        		window: {}
+            },
+            mappings: {}
+        })
+    </script>
+</head>
+<body>
+    <a-scene physics="debug: false">
+<!--        position="0 0 -15"-->
+        <a-entity id="rig" movement-controls="constrainToNavMesh: true"
+                  keyboard-controls
+                  kinematic-body="radius: 0.6"
+                  catch-camera-movements
+                  movements-listener
+                  position="0 0 -15"
+                  rotation="0 180 0">
+            <a-entity id="camera" camera="userHeight: 1.6" look-controls
+                      position="0 1.7 0"></a-entity>
+
+            <a-entity cursor="rayOrigin: mouse"
+                      raycaster="far: 2; objects: .biometric-borne-img, [call-elevator], .step-btn, .body, .head, .clickable, .a-push-button, .bill-button"></a-entity>
+
+            <a-entity id="left-hand"
+                      position="-0.25 0.6 0"
+                      hand-controls="hand: left; handModelStyle: lowPoly; color: #ffcccc"
+                      sphere-collider="objects: .ground, .celling" super-hands
+                      cursor raycaster="far: 2; objects: .biometric-borne-img, [call-elevator], .step-btn, .body, .head, .clickable, .a-push-button, .bill-button"
+                      teleport-controls="cameraRig: #rig; teleportOrigin: #camera; button: grip; type: parabolic;"></a-entity>
+
+            <a-entity id="right-hand"
+                      position="0.25 0.6 0"
+                      hand-controls="hand: right; handModelStyle: lowPoly; color: #ffcccc"
+                      sphere-collider="objects: a-door, a-box" super-hands
+                      cursor raycaster="far: 2; objects: .biometric-borne-img, [call-elevator], .step-btn, .body, .head, .clickable, .a-push-button, .bill-button"></a-entity>
+        </a-entity>
+
+        <a-sky color="skyblue"></a-sky>
+
+        <a-box class="ground" width="100" height="0.02" depth="100" color="green" static-body></a-box>
+
+        <a-entity position="0 0 0">
+            <a-entity class="facade" rotation="0 0 0" position="0 0 0">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="1.5 0 -6.5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+
+                <a-entity class="enter-door left" position="-1 0 -5.5" rotation="0 180 0">
+                    <a-box width="1" height="2" depth="0.2" position="-0.5 1 0" color="white" static-body></a-box>
+                </a-entity>
+                <a-entity class="enter-door right" position="1 0 -5.5" rotation="0 -180 0">
+                    <a-box width="1" height="2" depth="0.2" position="0.5 1 0" color="white" static-body></a-box>
+                </a-entity>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="-1.5 0 -6.5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 90 0" position="0.2 0 -0.7">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 -90 0" position="-0.2 0 -0.7">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 0 0" position="0 0 10">
+                <a-box width="11.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="5.8 0.2 -5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="-5.8 0.2 -5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+            </a-entity>
+
+            <a-box class="interupter outside" width="2" height="0.1" depth="2" position="0 0 -4" opacity="0" static-body
+                   detect-collisions="linkElems: .enter-door"></a-box>
+
+            <a-box class="interupter inside" width="2" height="0.1" depth="2" position="0 0 -8" opacity="0" static-body
+                   detect-collisions="linkElems: .enter-door"></a-box>
+        </a-entity>
+        <a-entity position="0 2.2 0">
+            <a-box class="step-ground" width="10.1" height="0.1" depth="10.1" color="white" position="0 0 -0.5" static-body></a-box>
+
+            <a-entity class="facade" rotation="0 0 0" position="0 0 0">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-entity class="balcony-door left" position="-1 0 -5.5" rotation="0 180 0">
+                    <a-box width="1" height="2" depth="0.2" position="-0.5 1 0" color="white" opacity="0.5" static-body></a-box>
+                </a-entity>
+                <a-entity class="balcony-door right" position="1 0 -5.5" rotation="0 -180 0">
+                    <a-box width="1" height="2" depth="0.2" position="0.5 1 0" color="white" opacity="0.5" static-body></a-box>
+                </a-entity>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box class="balcony" width="3.5" height="0.1" depth="3.5" color="lightgray" position="0 0 -7.5" static-body></a-box>
+                <a-box class="balcony" width="3.5" height="1.1" depth="0.05" opacity="0.8" position="0 0.5 -9.3" static-body></a-box>
+                <a-box class="balcony" width="3.54" height="1.1" depth="0.05" opacity="0.8" rotation="0 90 0" position="1.77 0.5 -7.55" static-body></a-box>
+                <a-box class="balcony" width="3.54" height="1.1" depth="0.05" opacity="0.8" rotation="0 90 0" position="-1.77 0.5 -7.55" static-body></a-box>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 90 0" position="0.2 0 -0.7">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 -90 0" position="-0.2 0 -0.7">
+                <a-box width="10.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+            </a-entity>
+
+            <a-entity class="facade" rotation="0 0 0" position="0 0 10">
+                <a-box width="11.1" height="0.2" depth="0.5" color="gray" position="0 2.1 -5.5"></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="-1.75 1 -5.5" static-body></a-box>
+                    <a-window position="-3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="-4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-box width="2" height="2" depth="0.5" color="gray" position="0 1 -5.5" static-body></a-box>
+
+                <a-entity class="wall" position="0 0 0">
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" position="1.75 1 -5.5" static-body></a-box>
+                    <a-window position="3.03 1.4 -5.5"></a-window>
+                    <a-box width="1.5" height="2" depth="0.5" color="gray" static-body position="4.3 1 -5.5"></a-box>
+                    <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="3.025 0.37 -5.5"></a-box>
+                </a-entity>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="5.8 0.2 -5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="-5.8 0.2 -5">
+                    <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
+                    <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
+                </a-cone>
+            </a-entity>
+
+            <a-box class="interupter outside" width="2" height="0.1" depth="2" position="0 0 -4" opacity="0" static-body
+                   detect-collisions="linkElems: .balcony-door"></a-box>
+
+            <a-box class="interupter inside" width="2" height="0.1" depth="2" position="0 0 -8" opacity="0" static-body
+                   detect-collisions="linkElems: .balcony-door"></a-box>
+        </a-entity>
+    </a-scene>
+</body>
+</html>
