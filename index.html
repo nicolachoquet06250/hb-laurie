@@ -11,113 +11,9 @@
     <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js"></script>
     <script src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
     <script src="https://unpkg.com/aframe-mirror-component/dist/aframe-mirror-component.min.js"></script>
-    <script>
-        AFRAME.registerComponent('detect-collisions', {
-        	schema: {
-        		outside: {
-        			type: 'boolean',
-                    default: true
-                },
-        		linkElems: {
-        			type: 'selectorAll'
-                }
-            },
-        	init() {
-                this.el.addEventListener('collide', () => {
-                    if (this.data.linkElems) {
-                    	for (const elem of this.data.linkElems) {
-                            if (!elem.hasAttribute('open-door') && !elem.hasAttribute('close-door')) {
-	                            elem.setAttribute('open-door', '');
-	                            document.querySelector('a-sound').components.sound.playSound();
-                            }
-                        }
-                    }
-                });
-            }
-        });
-
-        AFRAME.registerComponent('open-door', {
-        	init() {
-        		if (this.el.classList.contains('left')) {
-        			this.el.setAttribute('animation', `
-        			             property: rotation;
-                                 from: 0 180 0;
-                                 to: 0 90 0;
-                                 dur: 2000;
-                                 easing: linear;
-                                 loop: false`);
-                } else if (this.el.classList.contains('right')) {
-			        this.el.setAttribute('animation', `
-			                     property: rotation;
-                                 from: 0 -180 0;
-                                 to: 0 -90 0;
-                                 dur: 2000;
-                                 easing: linear;
-                                 loop: false`);
-                }
-
-        		const timeout = setTimeout(() => {
-			        const timeout2 = setTimeout(() => {
-				        this.el.removeAttribute('open-door');
-				        this.el.setAttribute('close-door', '');
-				        clearTimeout(timeout2);
-			        }, 3000);
-                    clearTimeout(timeout);
-                }, 2000);
-            }
-        });
-
-        AFRAME.registerComponent('close-door', {
-        	init() {
-        		if (this.el.classList.contains('left')) {
-        			this.el.setAttribute('animation', `
-        			             property: rotation;
-                                 from: 0 180 0;
-                                 to: 0 90 0;
-                                 dur: 2000;
-                                 dir: reverse;
-                                 easing: linear;
-                                 loop: false`);
-                } else if (this.el.classList.contains('right')) {
-			        this.el.setAttribute('animation', `
-			                     property: rotation;
-                                 from: 0 -180 0;
-                                 to: 0 -90 0;
-                                 dur: 2000;
-                                 dir: reverse;
-                                 easing: linear;
-                                 loop: false`);
-                }
-
-		        const timeout = setTimeout(() => {
-			        this.el.removeAttribute('close-door');
-			        this.el.removeAttribute('animation');
-        			clearTimeout(timeout);
-                }, 2000);
-            }
-        });
-
-        AFRAME.registerComponent('window', {
-        	init() {
-        		this.el.innerHTML = `<a-box width="0.05" height="1.2" depth="0.05" position="-0.5 0 0"></a-box>
-                        <a-box width="0.05" height="1.2" depth="0.05" position="0.5 0 0"></a-box>
-                        <a-box width="0.05" height="1.2" depth="0.05"></a-box>
-
-                        <a-box width="0.05" height="1" depth="0.05" rotation="0 0 90"></a-box>
-                        <a-box width="0.05" height="1.05" depth="0.05" position="0 -0.6 0" rotation="0 0 90"></a-box>
-                        <a-box width="0.05" height="1.05" depth="0.05" position="0 0.575 0" rotation="0 0 90"></a-box>
-
-                        <a-box width="1" height="1.2" depth="0.025" opacity="0.5" color="gray" position="0 0 0"></a-box>`;
-            }
-        });
-
-        AFRAME.registerPrimitive('a-window', {
-        	defaultComponents: {
-        		window: {}
-            },
-            mappings: {}
-        })
-    </script>
+    <script src="/assets/js/detect-collisions.js"></script>
+    <script src="/assets/js/door-actions.js"></script>
+    <script src="/assets/js/window.js"></script>
 </head>
 <body>
     <a-scene physics="debug: false">
@@ -126,18 +22,18 @@
             <a-asset-item id="roof-obj" src="assets/models/polygonalRoof.obj"></a-asset-item>
             <a-asset-item id="bougie-birthday-obj" src="assets/models/bougie_anniversaire.obj"></a-asset-item>
 
-            <img id="hb-laurie" src="assets/images/hb-laurie.png" />
+            <img id="hb-laurie" src="assets/images/hb-laurie.png" alt=""/>
 
-            <img id="karine" src="assets/images/karine.PNG" />
-            <img id="andre" src="assets/images/andre.PNG" />
-            <img id="yann" src="assets/images/yann.PNG" />
-            <img id="nolan" src="assets/images/nolan.PNG" />
-            <img id="nicolas" src="assets/images/nicolas.PNG" />
+            <img id="karine" src="assets/images/karine.PNG" alt=""/>
+            <img id="andre" src="assets/images/andre.PNG" alt=""/>
+            <img id="yann" src="assets/images/yann.PNG" alt=""/>
+            <img id="nolan" src="assets/images/nolan.PNG" alt=""/>
+            <img id="nicolas" src="assets/images/nicolas.PNG" alt=""/>
         </a-assets>
 <!--        position="0 0 -15"-->
         <a-entity id="rig" movement-controls="constrainToNavMesh: true"
                   keyboard-controls
-                  kinematic-body="radius: 0.6"
+                  kinematic-body="radius: 0.4; height: 1.7"
                   catch-camera-movements
                   movements-listener
                   position="0 0 -15"
@@ -151,6 +47,7 @@
             <a-entity id="left-hand"
                       position="-0.25 0.6 0"
                       hand-controls="hand: left; handModelStyle: lowPoly; color: #ffcccc"
+                      hand-tracking-controls="hand: left; modelColor: #ffcccc; modelStyle: lowPoly;"
                       sphere-collider="objects: .ground, .celling" super-hands
                       cursor raycaster="far: 2; objects: .biometric-borne-img, [call-elevator], .step-btn, .body, .head, .clickable, .a-push-button, .bill-button"
                       teleport-controls="cameraRig: #rig; teleportOrigin: #camera; button: grip; type: parabolic;"></a-entity>
@@ -158,6 +55,7 @@
             <a-entity id="right-hand"
                       position="0.25 0.6 0"
                       hand-controls="hand: right; handModelStyle: lowPoly; color: #ffcccc"
+                      hand-tracking-controls="hand: right; modelColor: #ffcccc; modelStyle: lowPoly;"
                       sphere-collider="objects: a-door, a-box" super-hands
                       cursor raycaster="far: 2; objects: .biometric-borne-img, [call-elevator], .step-btn, .body, .head, .clickable, .a-push-button, .bill-button"></a-entity>
         </a-entity>
@@ -180,7 +78,7 @@
                 <a-box width="1.5" depth="0.2" height="0.2" position="4.5 1.5 -0.6" static-body></a-box>
                 <a-box width="1.5" depth="0.2" height="0.2" position="4.5 1.7 -0.4" static-body></a-box>
                 <a-box width="1.5" depth="0.2" height="0.2" position="4.5 1.9 -0.2" static-body></a-box>
-                <a-box width="1.5" depth="3.5" height="0.305" position="4.5 2.1 1.6" static-body></a-box>
+                <a-box width="1.5" depth="2.69" height="0.305" position="4.5 2.1 1.2" static-body></a-box>
             </a-entity>
 
             <a-entity class="facade" rotation="0 0 0" position="0 0 0">
@@ -193,7 +91,7 @@
                     <a-box width="1.05" height="0.8" depth="0.5" color="gray" static-body position="-3.025 0.37 -5.5"></a-box>
                 </a-entity>
 
-                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="1.5 0 -6.5">
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="1.5 0.2 -6.5">
                     <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
                     <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
                 </a-cone>
@@ -205,7 +103,7 @@
                     <a-box width="1" height="2" depth="0.2" position="0.5 1 0" color="white" static-body></a-box>
                 </a-entity>
 
-                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="-1.5 0 -6.5">
+                <a-cone color="brown" radius-bottom="0.2" radius-top="0.4" height="0.4" position="-1.5 0.2 -6.5">
                     <a-cylinder height="0.1" radius="0.425" position="0 0.25 0" color="brown"></a-cylinder>
                     <a-sphere radius="0.5" color="green" position="0 0.6 0"></a-sphere>
                 </a-cone>
@@ -357,7 +255,6 @@
                 </a-box>
             </a-entity>
 
-
             <a-entity class="avatar nicolas" position="1.5 0 -10" rotation="0 45 0">
                 <a-entity class="chat-bubble" rotation="0 180 0" position="0 2 0">
                     <a-text color="black" value="Bienvenue" position="-0.5 0 0"></a-text>
@@ -379,7 +276,7 @@
                 </a-box>
             </a-entity>
 
-            <a-entity class="table" position="0 0 0">
+            <a-entity class="table" position="0 0 0" static-body>
                 <a-box class="plateau" width="2" height="0.02" depth="2" position="0 0.72 0" mirror>
                     <a-cylinder radius="0.5" height="0.005" color="brown" position="0 0.0125 0">
                         <a-entity class="cake" position="0 0 0">
